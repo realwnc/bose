@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mids.mybatis.mapper.OrganizationMapper">
+    <resultMap id="BaseResultMap" type="com.mids.mybatis.model.Organization">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <result column="codex" property="codex" jdbcType="VARCHAR"/>
+        <result column="icon" property="icon" jdbcType="VARCHAR"/>
+        <result column="pid" property="pid" jdbcType="INTEGER"/>
+        <result column="seq" property="seq" jdbcType="TINYINT"/>
+        <result column="insert_time" property="insertTime" jdbcType="TIMESTAMP" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+    <sql id="Base_Column_List">
+		id, name, address, codex, icon, pid, seq, insert_time, update_time
+	</sql>
+
+    <insert id="insert" parameterType="com.mids.mybatis.model.Organization" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_sys_organization (name, address, codex, icon, pid, seq, insert_time, update_time)
+        values (#{name,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{codex,jdbcType=VARCHAR},
+        #{icon,jdbcType=VARCHAR}, #{pid,jdbcType=INTEGER}, #{seq,jdbcType=TINYINT}, now(), now()
+        )
+    </insert>
+
+    <update id="update" parameterType="com.mids.mybatis.model.Organization">
+        update tb_sys_organization
+        <set>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null">
+                address = #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="codex != null">
+                codex = #{codex,jdbcType=VARCHAR},
+            </if>
+            <if test="icon != null">
+                icon = #{icon,jdbcType=VARCHAR},
+            </if>
+            <if test="pid != null">
+                pid = #{pid,jdbcType=INTEGER},
+            </if>
+            <if test="seq != null">
+                seq = #{seq,jdbcType=TINYINT},
+            </if>
+            <if test="insertTime != null" >
+                insert_time = #{insertTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null" >
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <select id="findAllByPid0" resultMap="BaseResultMap">
+        select distinct
+        <include refid="Base_Column_List"/>
+        from tb_sys_organization where pid = 0 order by seq
+    </select>
+
+    <select id="findAllByPid" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select distinct
+        <include refid="Base_Column_List"/>
+        from tb_sys_organization where pid = #{pid} order by seq
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_sys_organization order by seq
+    </select>
+
+    <select id="findById" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_sys_organization where id = #{id}
+    </select>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+    delete from tb_sys_organization
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+</mapper>

@@ -1,0 +1,21 @@
+.i_table{
+	width: 100%;
+	height: 100%;
+	border: 1px solid #739ACE;
+	background: #efefef;
+}
+
+.i_textarea {
+	position: relative;
+	border: 1px solid #D4D4D4;
+	background-color: #FFF;
+	vertical-align: middle;
+	display: inline-block;
+	white-space: pre-wrap;
+	margin: 0;
+	padding: 0;
+	-moz-border-radius: 5px 5px 5px 5px;
+	-webkit-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px 5px 5px 5px;
+	font-size:13px;
+}

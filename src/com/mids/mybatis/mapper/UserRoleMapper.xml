@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mids.mybatis.mapper.UserRoleMapper">
+    <resultMap id="BaseResultMap" type="com.mids.mybatis.model.UserRole">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="role_id" property="roleId" jdbcType="INTEGER"/>
+        <result column="insert_time" property="insertTime" jdbcType="TIMESTAMP" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+	<resultMap id="userRoleBaseResultMap" type="com.mids.mybatis.model.UserRole" extends="BaseResultMap">
+		<association property="role" javaType="com.mids.mybatis.model.Role">
+			<id column="role_id" property="id" jdbcType="INTEGER" />
+			<result column="role_name" property="name" jdbcType="VARCHAR" />
+		</association>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+		id, user_id, role_id, insert_time, update_time
+	</sql>
+    
+    <delete id="deleteById" parameterType="java.lang.Integer">
+		delete from tb_sys_user_role
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+
+    <insert id="insert" parameterType="com.mids.mybatis.model.UserRole" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_sys_user_role (user_id, role_id, insert_time, update_time)
+        values (#{userId,jdbcType=INTEGER}, #{roleId,jdbcType=INTEGER}, #{insertTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.mids.mybatis.model.UserRole">
+        update tb_sys_user_role
+        <set>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="roleId != null">
+                role_id = #{roleId,jdbcType=INTEGER},
+            </if>
+            <if test="insertTime != null">
+                insert_time = #{insertTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    
+    <select id="findByUserId" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        SELECT
+            t.*
+        FROM
+            tb_sys_user_role t,
+            tb_sys_role o
+        WHERE
+            t.role_id = o.id 
+        AND user_id = #{userId,jdbcType=INTEGER}
+    </select>
+
+    <select id="findRoleIdListByUserId" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        SELECT
+            t.role_id AS roleId
+        FROM
+            tb_sys_user_role t,
+            tb_sys_role o
+        WHERE
+            t.role_id = o.id
+        AND o.statusx = 0
+        AND t.user_id = #{userId,jdbcType=INTEGER}
+	</select>
+
+	<select id="findListByUserId" resultMap="userRoleBaseResultMap" parameterType="java.lang.Integer">
+		SELECT
+			TA.id, TA.user_id, TA.role_id, TB.id AS role_id, TB.name AS role_name
+		FROM
+			tb_sys_user_role TA,
+			tb_sys_role TB
+		WHERE
+			TA.role_id = TB.id
+		AND 
+			TA.user_id = #{userId,jdbcType=INTEGER}
+	</select>
+
+</mapper>

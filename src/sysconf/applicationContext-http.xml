@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans   
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd   
+	http://www.springframework.org/schema/tx   
+	http://www.springframework.org/schema/tx/spring-tx-4.1.xsd   
+	http://www.springframework.org/schema/context   
+	http://www.springframework.org/schema/context/spring-context-4.1.xsd   
+	http://www.springframework.org/schema/util    
+	http://www.springframework.org/schema/util/spring-util-4.1.xsd   
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-4.1.xsd 
+	http://www.springframework.org/schema/cache    
+	http://www.springframework.org/schema/cache/spring-cache.xsd">
+	
+	<!--方式二、使用httpclient的实现，带连接池-->
+    <bean id="httputil.pollingConnectionManager" class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager">
+        <!--整个连接池的并发-->
+        <property name="maxTotal" value="3000" />
+        <!--每个主机的并发-->
+        <property name="defaultMaxPerRoute" value="1000" />
+    </bean>
+ 
+    <bean id="httputil.httpClientBuilder" class="org.apache.http.impl.client.HttpClientBuilder" factory-method="create">
+        <property name="connectionManager" ref="httputil.pollingConnectionManager" />
+        <!--开启重试-->
+        <property name="retryHandler">
+            <bean class="org.apache.http.impl.client.DefaultHttpRequestRetryHandler">
+                <constructor-arg value="2"/>
+                <constructor-arg value="true"/>
+            </bean>
+        </property>
+        <property name="defaultHeaders">
+            <list>
+                <bean class="org.apache.http.message.BasicHeader">
+                    <constructor-arg value="User-Agent"/>
+                    <constructor-arg value="Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.16 Safari/537.36"/>
+                </bean>
+                <bean class="org.apache.http.message.BasicHeader">
+                    <constructor-arg value="Accept-Encoding"/>
+                    <constructor-arg value="gzip,deflate"/>
+                </bean>
+                <bean class="org.apache.http.message.BasicHeader">
+                    <constructor-arg value="Accept-Language"/>
+                    <constructor-arg value="zh-CN"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
+ 
+    <bean id="httputil.httpClient" factory-bean="httputil.httpClientBuilder" factory-method="build" />
+ 
+    <bean id="httputil.clientHttpRequestFactory" class="org.springframework.http.client.HttpComponentsClientHttpRequestFactory">
+        <constructor-arg ref="httputil.httpClient"/>
+        <!--连接超时时间，毫秒-->
+        <property name="connectTimeout" value="5000"/>
+        <!--读写超时时间，毫秒-->
+        <property name="readTimeout" value="10000"/>
+    </bean>
+ 
+    <bean id="restHttpTemplate" class="org.springframework.web.client.RestTemplate">
+        <constructor-arg ref="httputil.clientHttpRequestFactory"/>
+        <property name="errorHandler">
+            <bean class="org.springframework.web.client.DefaultResponseErrorHandler"/>
+        </property>
+        <!--
+        <property name="messageConverters">
+            <list>
+                <bean class="org.springframework.http.converter.FormHttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                    <property name="supportedMediaTypes">
+                        <list>
+                            <value>text/plain;charset=UTF-8</value>
+                        </list>
+                    </property>
+                </bean>
+            </list>
+        </property>
+        -->
+    </bean>
+    <!-- 使用 restTemplate 做为 service的一个bean, 可以如下用
+    private static RestTemplate restTemplate;
+    ResponseEntity<User> rECreateUser = restTemplate.postForEntity("https://127.0.0.1:8443/skeleton-1.0/login", user, User.class);
+    -->
+</beans>	

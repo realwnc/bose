@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mids.mybatis.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.mids.mybatis.model.User">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="sex" property="sex" jdbcType="TINYINT"/>
+        <result column="age" property="age" jdbcType="TINYINT"/>
+        <result column="user_type" property="userType" jdbcType="TINYINT"/>
+        <result column="statusx" property="statusx" jdbcType="TINYINT"/>
+        <result column="organization_id" property="organizationId" jdbcType="INTEGER"/>
+        <result column="insert_time" property="insertTime" jdbcType="TIMESTAMP" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <resultMap id="userVoResultMap" type="com.mids.mybatis.vo.UserVo" extends="BaseResultMap">
+       
+		<result column="as_organization_name" property="organizationName" jdbcType="VARCHAR"/>
+		<!--
+        <collection property="rolesList" ofType="com.mids.mybatis.model.Role">
+            <id column="roleId" property="id"/>
+            <result column="roleName" property="name"/>
+        </collection>
+		-->
+		<!--
+		<result column="roleId" property="roleId" jdbcType="INTEGER"/>
+		<result column="roleName" property="roleName" jdbcType="VARCHAR"/>
+		-->
+    </resultMap>
+    <sql id="Base_Column_List">
+		id, username, name, password, phone, sex, age, user_type, statusx, organization_id, insert_time, update_time
+	</sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_sys_user
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_sys_user
+        where id = #{id,jdbcType=INTEGER}
+    </select>    
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+		delete from tb_sys_user
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+
+    <insert id="insert" parameterType="com.mids.mybatis.model.User" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_sys_user (username, name, password, phone, 
+        sex, age, user_type,
+        statusx, organization_id, insert_time, update_time
+        )
+        values (#{username,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, 
+        #{sex,jdbcType=TINYINT}, #{age,jdbcType=TINYINT}, #{userType,jdbcType=TINYINT},
+        #{statusx,jdbcType=TINYINT}, #{organizationId,jdbcType=INTEGER}, #{insertTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP} 
+        )
+    </insert>
+
+    <update id="update" parameterType="com.mids.mybatis.model.User">
+        update tb_sys_user
+        <set>
+            <if test="username != null">
+                username = #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+                password = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null">
+                sex = #{sex,jdbcType=TINYINT},
+            </if>
+            <if test="age != null">
+                age = #{age,jdbcType=TINYINT},
+            </if>
+            <if test="userType != null">
+                user_type = #{userType,jdbcType=TINYINT},
+            </if>
+            <if test="statusx != null">
+                statusx = #{statusx,jdbcType=TINYINT},
+            </if>
+            <if test="organizationId != null">
+                organization_id = #{organizationId,jdbcType=INTEGER},
+            </if>
+            <if test="insertTime != null">
+                insert_time = #{insertTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="phone != null">
+                phone = #{phone,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <select id="findByUsername" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_sys_user
+        where username = #{username,jdbcType=VARCHAR}
+    </select>
+
+    <select id="findVoById" resultMap="userVoResultMap" parameterType="java.lang.Integer">
+        SELECT
+			t.*,
+			s.name AS as_organization_name
+
+		FROM
+			tb_sys_user t,
+			tb_sys_organization s
+		WHERE
+			s.id = t.organization_id
+        AND
+            t.id = #{id,jdbcType=INTEGER}
+    </select>
+	
+    <update id="updatePwdById">
+		update tb_sys_user
+		set password = #{password,jdbcType=VARCHAR},
+		dt_createtime = now()
+		where id = #{userId,jdbcType=INTEGER}
+	</update>
+    <select id="findVoList" resultMap="userVoResultMap" parameterType="com.mids.mybatis.vo.UserVo">
+        SELECT
+			t.*,
+			s.name AS as_organization_name
+
+		FROM
+			tb_sys_user t,
+			tb_sys_organization s
+		WHERE
+			s.id = t.organization_id
+		<if test=" name != null and name != '' ">
+			AND t.name = #{name,jdbcType=VARCHAR}
+		</if>
+		<if test=" organizationId != null ">
+			AND t.organization_id = #{organizationId,jdbcType=INTEGER}
+		</if>
+		<if test="startTime != null">
+			<![CDATA[
+				AND t.update_time >= #{startTime,jdbcType=TIMESTAMP}
+			]]>
+	    </if>
+		<if test="endTime != null">
+		    <![CDATA[
+				AND t.update_time <= #{endTime,jdbcType=TIMESTAMP}
+			]]>
+		</if>
+    </select>
+</mapper>

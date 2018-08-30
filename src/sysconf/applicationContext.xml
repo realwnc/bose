@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans   
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd   
+	http://www.springframework.org/schema/tx   
+	http://www.springframework.org/schema/tx/spring-tx-4.1.xsd   
+	http://www.springframework.org/schema/context   
+	http://www.springframework.org/schema/context/spring-context-4.1.xsd   
+	http://www.springframework.org/schema/util    
+	http://www.springframework.org/schema/util/spring-util-4.1.xsd   
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-4.1.xsd 
+	http://www.springframework.org/schema/cache    
+	http://www.springframework.org/schema/cache/spring-cache.xsd">
+	
+	<import resource="dataSource.xml"/>
+	
+	<tx:annotation-driven transaction-manager="txManager" order="200"/>	
+	
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+
+	<!-- 配置Advice（配置事务的传播特性） -->
+	 <tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!-- <tx:method name="add*" propagation="REQUIRED" rollback-for="java.lang.Exception"/> -->
+            <!-- rollback-for="java.lang.Throwable" -->
+            <tx:method name="add*" propagation="REQUIRED"/>
+			<tx:method name="insert*" propagation="REQUIRED"/>
+			<tx:method name="delete*" propagation="REQUIRED"/>
+			<tx:method name="modify*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+            <tx:method name="save*" propagation="REQUIRED" />
+            <tx:method name="sudo*" propagation="REQUIRED" />
+			<tx:method name="*" propagation="REQUIRED" read-only="true"/>
+		</tx:attributes>
+	</tx:advice>
+	
+	<context:component-scan base-package="com.mids">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<!-- 配置哪些类的哪些方法使用事务（配置事务边界） -->
+	<!--
+	<aop:config proxy-target-class="true">
+		<aop:pointcut id="allManagerMethod" expression="execution(* com.mids.mybatis.dao.impl.*.*(..))" />
+		<aop:advisor pointcut-ref="allManagerMethod" advice-ref="txAdvice" />
+	</aop:config>
+	-->
+	<aop:config proxy-target-class="true">
+		<aop:pointcut id="allManagerMethod" expression="execution(* com.mids.service.impl.*.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="allManagerMethod" />
+	</aop:config>
+	
+	<!-- HttpClient begin 
+	<bean id="pollingConnectionManager" class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager">
+		<property name="maxTotal" value="1000" />
+		<property name="defaultMaxPerRoute" value="600" />
+	</bean>
+	
+	<bean id="noResponseRetryHandler" class="com.mids.common.http.NoResponseRetryHandler"/>
+
+	<bean id="httpClientBuilder" class="org.apache.http.impl.client.HttpClientBuilder" factory-method="create">
+		<property name="connectionManager" ref="pollingConnectionManager" />
+		<property name="retryHandler" ref="noResponseRetryHandler" />
+	</bean>
+
+	<bean id="httpClient" factory-bean="httpClientBuilder" factory-method="build" destroy-method="close"/>
+	
+	<bean id="clientHttpRequestFactory"
+		class="org.springframework.http.client.HttpComponentsClientHttpRequestFactory">
+		<constructor-arg ref="httpClient" />
+		<property name="connectTimeout" value="60000" />
+		<property name="readTimeout" value="60000" />
+	</bean>
+	 HttpClient endxx -->
+    
+	<!-- javamelody begin -->	
+	<bean id="facadeMonitoringAdvisor" class="net.bull.javamelody.MonitoringSpringAdvisor">
+		<property name="pointcut">
+			<bean class="org.springframework.aop.support.JdkRegexpMethodPointcut">
+				<property name="patterns">
+					<list>
+						 <value>com.mids.service..*.*</value>
+						 <value>com.mids.controller.*</value>
+						 <value>com.mids.servlet3..*.*</value>
+						 <!--<value>com.mids.quartz..*.*</value>-->
+					</list>
+				</property>
+				<property name="excludedPattern" value=".*Run.*" />
+			</bean>
+		</property>
+	</bean>
+	<!--
+	<bean id="ProxyFactoryBean" class="org.springframework.aop.framework.ProxyFactoryBean">
+	    <property name="target">
+	     	<ref bean="Computer" />
+	    </property>
+	    <property name="interceptorNames">
+		     <list>
+		      	<value>facadeMonitoringAdvisor</value>
+		     </list>
+	    </property>
+	</bean>
+	-->
+	<!-- javamelody endxx -->
+</beans>	

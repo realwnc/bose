@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="   
+    http://www.springframework.org/schema/beans   
+    http://www.springframework.org/schema/beans/spring-beans-4.1.xsd 
+	http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-4.1.xsd 
+    http://www.springframework.org/schema/context   
+    http://www.springframework.org/schema/context/spring-context-4.1.xsd
+    http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd">
+	
+	<!-- 自动搜索@Controller标注的类 -->
+	<context:component-scan base-package="com.mids"/>
+	<!-- 启用CGliB -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+	<!-- 基于Annotation的映射方式 -->	
+	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/>
+	
+	<mvc:annotation-driven>
+		<mvc:message-converters register-defaults="false">
+			<bean class="org.springframework.http.converter.FormHttpMessageConverter" />
+			<bean class="org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter" />
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>text/*;charset=utf-8</value>
+						<value>application/json;charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+            <!--
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<constructor-arg name="defaultCharset" value="UTF-8" />
+			</bean>
+            -->
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+
+	<!-- 配置国际化资源文件路径 -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename">
+			<!-- 定义消息资源文件的相对路径 -->
+			<value>messages/message</value>
+		</property>
+		<property name="useCodeAsDefaultMessage" value="true" />
+	</bean>
+	<!-- 基于Cookie的本地化解析器 -->
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+		<property name="cookieMaxAge" value="604800" />
+		<property name="defaultLocale" value="zh_CN" />
+		<property name="cookieName" value="Language"></property>
+	</bean>
+	<!-- 基于Session的本地化解析器 -->
+	<!--<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" /> -->
+
+	<!-- view Resolver -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+		<property name="prefix" value="/view/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+
+	<!-- Mapping exception to the handler view --> 
+	<bean id="exceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver"> 
+		<property name="defaultErrorView" value="/error"/> 
+		<property name="exceptionMappings"> 
+        	<props> 
+
+        	</props> 
+		</property> 
+	</bean>
+
+    <!-- 3.1 对静态资源文件的访问， 将无法mapping到Controller的path交给default servlet handler处理 -->
+    <mvc:default-servlet-handler />
+	<!-- 配置哪些是静态资源，缺省Servlet 直接返回 -->
+    <mvc:resources location="/static/" mapping="/static/**" cache-period="31536000" />
+	<context:annotation-config />
+
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="true">
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!-- 文件上传 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="utf-8"></property>
+        <!-- 设置上传文件总大小限制 -->
+        <property name="maxUploadSize" value="1024000000"></property>
+        <property name="maxInMemorySize" value="40960"></property>
+        <property name="uploadTempDir" value="fileUpload/temp"></property>
+    </bean>
+    
+    <!-- 登录拉截 -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/sys/**"/>
+            <mvc:mapping path="/crm/**"/>
+            <!--
+            <mvc:exclude-mapping path="/ecsr/*"/>
+            <mvc:exclude-mapping path="/olady/*"/>
+            <mvc:exclude-mapping path="/app/*"/>
+            -->
+            <bean class="com.mids.interceptor.LoginInterceptor"></bean>
+        </mvc:interceptor>
+        <!-- APP请求拉截 -->
+        <mvc:interceptor>
+            <mvc:mapping path="/app/**"/>
+            <mvc:exclude-mapping path="/app/open/*"/>
+            <mvc:exclude-mapping path="/app/test/*"/>
+            <bean class="com.mids.interceptor.AppAuthInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+</beans>

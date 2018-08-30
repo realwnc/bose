@@ -1,0 +1,80 @@
+.icon-info{
+	background:url('icons/search.png') no-repeat center center;
+}
+
+.icon-del{
+	background:url('icons/del.png') no-repeat center center;
+}
+
+.icon-home{
+	background:url('icons/home.png') no-repeat center center;
+}
+
+.icon-refresh{
+	background:url('icons/refresh.png') no-repeat center center;
+}
+
+.icon-draw{
+	background:url('myicons/draw.png') no-repeat center center;
+}
+
+.icon-media{
+	background:url('myicons/media.gif') no-repeat center center;
+}
+
+.icon-view{
+	background:url('myicons/view.png') no-repeat center center;
+}
+
+.icon-copy{
+	background:url('myicons/copy.png') no-repeat center center;
+}
+
+.icon-down{
+	background:url('myicons/down.png') no-repeat center center;
+}
+
+.icon-up{
+	background:url('myicons/up.png') no-repeat center center;
+}
+
+
+.icon-issue{
+	background:url('myicons/issue.png') no-repeat center center;
+}
+
+.icon-play{
+	background:url('myicons/play.png') no-repeat center center;
+}
+
+.icon-playx{
+	background:url('myicons/playx.png') no-repeat center center;
+}
+
+.icon-stop{
+	background:url('myicons/stop.png') no-repeat center center;
+}
+
+.icon-pause{
+	background:url('myicons/pause.png') no-repeat center center;
+}
+
+.icon-oper{
+	background:url('myicons/oper.png') no-repeat center center;
+}
+
+.icon-power{
+	background:url('myicons/power.png') no-repeat center center;
+}
+
+.icon-map{
+	background:url('myicons/map.gif') no-repeat center center;
+}
+
+.icon-flow{
+	background:url('myicons/flow.png') no-repeat center center;
+}
+
+.icon-eye{
+	background:url('myicons/eye.png') no-repeat center center;
+}
